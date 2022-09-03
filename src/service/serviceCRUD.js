@@ -39,6 +39,56 @@ const createUser = async (data) => {
         })
 }
 
+const updateUser = (userId, formData) => {
+    return new Promise(
+        async (resolve, reject) => {
+            try {
+                const user = await getUserById(userId);
+
+                if (user) {
+                    await db.Users.upsert({
+                        id: userId,
+                        ...formData
+                    })
+                    resolve('Thay đổi thành công')
+                }
+                else {
+                    resolve(false)
+                }
+            }
+            catch (err) {
+                reject(err)
+            }
+        })
+}
+
+const deleteUser = (userId) => {
+    return new Promise(
+        async (resolve, reject) => {
+            try {
+                const user = await getUserById(userId);
+
+                if (user) {
+                    const hasDel = await db.Users.destroy({
+                        where: { id: userId }
+                    });
+                    if (hasDel) {
+                        resolve('Xoá thành công')
+                    }
+                    else {
+                        resolve(false)
+                    }
+                }
+                else {
+                    resolve(false)
+                }
+            }
+            catch (err) {
+                reject(err)
+            }
+        })
+}
+
 const getAllUser = () => {
     return new Promise(
         async (resolve, reject) => {
@@ -54,4 +104,28 @@ const getAllUser = () => {
         })
 }
 
-module.exports = { createUser, getAllUser }
+const getUserById = async (userId) => {
+    return new Promise(
+        async (resolve, reject) => {
+            try {
+                const user = await db.Users.findOne({
+                    where: { id: userId },
+                    raw: true
+                })
+                if (user) {
+                    resolve(user)
+                }
+                else {
+                    resolve(false)
+                }
+            }
+            catch (err) {
+                reject(err)
+            }
+        }
+    )
+}
+
+
+
+module.exports = { createUser, getAllUser, getUserById, updateUser, deleteUser }
